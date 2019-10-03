@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petronet-deployment
+  namespace: local
+  labels:
+    app: petronet-app
+    env: petronet
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petronet-app
+      env: petronet
+  template:
+    metadata:
+      name: petronet-app
+      labels:
+        app: petronet-app
+        env: petronet
+    spec:
+      containers:
+        - name: petronet-app
+          image: petronet-code:local
+          imagePullPolicy: Never
+          env:
+            - name:  LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME
+              value: org.postgresql.Driver
+            - name:  LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL
+              value: jdbc:postgresql://postgres-service:5432/petronet
+            - name:  LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME
+              value: postgres
+            - name:  LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD
+              value: postgres
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: petronet-service
+  namespace: local
+  labels:
+    app: petronet-app
+    env: petronet
+
+spec:
+  type: NodePort
+  selector:
+    app: petronet-app
+    env: petronet
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
+      name: ui

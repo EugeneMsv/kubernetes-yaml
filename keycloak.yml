@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloack
+  namespace: local
+  labels:
+    app: keycloak
+    env: sberdex
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+      env: sberdex
+  template:
+    metadata:
+      name: keycloak-pod
+      labels:
+        app: keycloak
+        env: sberdex
+    spec:
+      containers:
+        - name: keycloak
+          image: jboss/keycloak
+          env:
+            - name: KEYCLOAK_USER
+              value: "admin"
+            - name: KEYCLOAK_PASSWORD
+              value: "admin"
+            - name: DB_DATABASE
+              value: "keycloak"
+            - name: DB_VENDOR
+              value: "postgres"
+            - name: DB_ADDR
+              value: "postgres-service:5432"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "postgres"
+          resources:
+            limits:
+              memory: "500Mi"
+            requests:
+              memory: "300Mi"
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: keycloak-service
+  namespace: local
+  labels:
+    app: keycloak
+    env: sberdex
+
+spec:
+  type: NodePort
+  selector:
+    app: keycloak
+    env: sberdex
+  ports:
+    - protocol: TCP
+      port: 8080
+      nodePort: 30010
+      name: ui
+
