@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-manager-deployment
+  namespace: local
+  labels:
+    app: kafka-manager
+    env: petronet
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-manager
+      env: petronet
+  template:
+    metadata:
+      name: kafka-manager-pod
+      labels:
+        app: kafka-manager
+        env: petronet
+    spec:
+      containers:
+        - name: kafka-manager
+          image: sheepkiller/kafka-manager
+          env:
+            - name: ZK_HOSTS
+              value: "localhost:9093"
+          resources:
+            limits:
+              memory: "500Mi"
+            requests:
+              memory: "300Mi"
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: kafka-manager-service
+  namespace: local
+  labels:
+    app: kafka-manager
+    env: petronet
+
+spec:
+  type: NodePort
+  selector:
+    app: kafka-manager
+    env: petronet
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+      nodePort: 30009
+      name: kafka-manager
+

@@ -20,6 +20,11 @@ spec:
         app: postgres-db
         env: petronet
     spec:
+      volumes:
+        - name: db
+          hostPath:
+            path: /tmp/postgres-data
+            type: DirectoryOrCreate
       containers:
         - name: postgres
           image: postgres
@@ -28,6 +33,9 @@ spec:
               value: "postgres"
             - name: POSTGRES_PASSWORD
               value: "postgres"
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: db
           resources:
             limits:
               memory: "500Mi"
