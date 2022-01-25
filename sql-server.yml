@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sql-server-deployment
+  namespace: local
+  labels:
+    app: mysql-db
+    env: project
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sql-server-db
+      env: project
+  template:
+    metadata:
+      name: sql-server-pod
+      labels:
+        app: sql-server-db
+        env: project
+    spec:
+      containers:
+        - name: sql-server
+          image: mcr.microsoft.com/mssql/server:2019-latest
+          env:
+            - name: MSSQL_PID
+              value: "Developer"
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              value: "yourStrong(!)Password"
+          resources:
+            limits:
+              memory: "3000Mi"
+            requests:
+              memory: "1000Mi"
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: sql-server-service
+  namespace: local
+  labels:
+    app: sql-server-db
+    env: project
+
+spec:
+  type: NodePort
+  selector:
+    app: sql-server-db
+    env: project
+  ports:
+    - protocol: TCP
+      port: 1433
+      targetPort: 1433
+      nodePort: 30001
+      name: db
+
